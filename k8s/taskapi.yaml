@@ -1,0 +1,69 @@
+# ServiceAccount for TaskAPI
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: taskapi-sa
+---
+# ClusterRole for TaskAPI
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: taskapi-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["create", "delete", "get", "list", "watch"]
+---
+# ClusterRoleBinding for TaskAPI
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: taskapi-binding
+subjects:
+- kind: ServiceAccount
+  name: taskapi-sa
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: taskapi-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# TaskAPI Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taskapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: taskapi
+  template:
+    metadata:
+      labels:
+        app: taskapi
+    spec:
+      serviceAccountName: taskapi-sa
+      containers:
+      - name: taskapi
+        image: taskapi:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          value: "mongodb://mongodb-service:27017/taskdb"
+---
+# TaskAPI Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: taskapi-service-new
+spec:
+  type: NodePort
+  selector:
+    app: taskapi
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30082

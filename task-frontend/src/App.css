@@ -1,0 +1,19 @@
+@import '~antd/dist/reset.css';
+
+.App {
+  text-align: center;
+}
+
+.ant-layout-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.ant-table-expanded-row-fixed {
+  background-color: #fafafa;
+}
+
+.ant-collapse-ghost > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
+  padding: 8px 0;
+}
